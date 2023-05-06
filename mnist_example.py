@@ -14,7 +14,7 @@ from keras.layers import (
 #### Ada 3 Cara ####
 # tensorf.ow.keras.Sequential
 # ----- Common research architechture to double filters every time -----
-model = tf.keras.Sequential(
+sequential_model = tf.keras.Sequential(
     [
         Input(
             shape=(
@@ -50,6 +50,25 @@ model = tf.keras.Sequential(
 )
 
 # functional approach: function that returns a model
+# ----- Every step is input for next step -----
+# more flexible; can have multiple inputs/outputs
+def functional_model():
+    my_input = Input(shape=(28, 28, 1))
+    x = Conv2D(filters=32, kernel_size=(3, 3), activation="relu")(my_input)
+    x = Conv2D(filters=64, kernel_size=(3, 3), activation="relu")(x)
+    x = MaxPooling2D()(x)
+    x = BatchNormalization()(x)
+    x = Conv2D(filters=128, kernel_size=(3, 3), activation="relu")(x)
+    x = MaxPooling2D()(x)
+    x = BatchNormalization()(x)
+    x = GlobalAveragePooling2D()(x)
+    x = Dense(64, activation="relu")(x)
+    x = Dense(10, activation="softmax")(x)
+    
+    model = tf.keras.Model(inputs=my_input, outputs=x)
+    return model
+
+
 # keras.Model: inherit from this class
 
 
@@ -62,7 +81,7 @@ def display_some_examples(images, labels):
         label = labels[idx]
 
         plt.subplot(5, 5, i + 1)
-        plt.title(str(label))
+        plt.title(str(label))  # type:ignore
         plt.tight_layout()
         plt.imshow(img, cmap="gray")
     plt.show()
@@ -70,7 +89,7 @@ def display_some_examples(images, labels):
 
 if __name__ == "__main__":
     (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
-
+    model = functional_model()
     # Normalize data; gradient moves faster in most cases
     x_train = x_train.astype("float32") / 255  # Source data 8bit integer
     x_test = x_test.astype("float32") / 255  # Source data 8bit integer
