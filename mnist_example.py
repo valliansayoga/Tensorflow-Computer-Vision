@@ -13,6 +13,7 @@ from keras.layers import (
 
 #### Ada 3 Cara ####
 # tensorf.ow.keras.Sequential
+# good for tutorial; easy to build
 # ----- Common research architechture to double filters every time -----
 sequential_model = tf.keras.Sequential(
     [
@@ -49,6 +50,7 @@ sequential_model = tf.keras.Sequential(
     ]
 )
 
+
 # functional approach: function that returns a model
 # ----- Every step is input for next step -----
 # more flexible; can have multiple inputs/outputs
@@ -64,12 +66,43 @@ def functional_model():
     x = GlobalAveragePooling2D()(x)
     x = Dense(64, activation="relu")(x)
     x = Dense(10, activation="softmax")(x)
-    
+
     model = tf.keras.Model(inputs=my_input, outputs=x)
     return model
 
 
 # keras.Model: inherit from this class
+# ----- More advanced; mirip pytorch ----
+class MyCustomModels(tf.keras.Model):
+    def __init__(self):
+        super().__init__()
+
+        self.conv2d1 = Conv2D(filters=32, kernel_size=(3, 3), activation="relu")
+        self.conv2d2 = Conv2D(filters=64, kernel_size=(3, 3), activation="relu")
+        self.maxpooling2d1 = MaxPooling2D()
+        self.batchnormalization1 = BatchNormalization()
+
+        self.conv2d3 = Conv2D(filters=128, kernel_size=(3, 3), activation="relu")
+        self.maxpooling2d2 = MaxPooling2D()
+        self.batchnormalization2 = BatchNormalization()
+
+        self.globalaveragepooling2d1 = GlobalAveragePooling2D()
+        self.dense1 = Dense(64, activation="relu")
+        self.dense2 = Dense(10, activation="softmax")
+
+    def call(self, my_input):
+        x = self.conv2d1(my_input)
+        x = self.conv2d2(x)
+        x = self.maxpooling2d1(x)
+        x = self.batchnormalization1(x)
+        x = self.conv2d3(x)
+        x = self.maxpooling2d2(x)
+        x = self.batchnormalization2(x)
+        x = self.globalaveragepooling2d1(x)
+        x = self.dense1(x)
+        x = self.dense2(x)
+
+        return x
 
 
 def display_some_examples(images, labels):
@@ -89,15 +122,18 @@ def display_some_examples(images, labels):
 
 if __name__ == "__main__":
     (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
-    model = functional_model()
+
+    # Init
+    # model = functional_model()
+    model = MyCustomModels()
+
     # Normalize data; gradient moves faster in most cases
     x_train = x_train.astype("float32") / 255  # Source data 8bit integer
     x_test = x_test.astype("float32") / 255  # Source data 8bit integer
-    
+
     # One hot encoding label for y! Do if you want use categorical_crossentropy!
     # y_train = tf.keras.utils.to_categorical(y_train, 10)  # 10 labels
     # y_test = tf.keras.utils.to_categorical(y_test, 10)
-    
 
     # Nambah dimensi karena di model ada dimensi tambahan yaitu n_channel
     # 3 karena nambah dimensi index ke 3 dari shape data nya
@@ -108,7 +144,7 @@ if __name__ == "__main__":
     model.compile(
         optimizer="adam",
         loss="sparse_categorical_crossentropy",  # for classification
-            # if categorical_crossentropy labels must 1 hot encoded!
+        # if categorical_crossentropy labels must 1 hot encoded!
         metrics="accuracy",
     )
 
