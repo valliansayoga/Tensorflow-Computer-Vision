@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 def display_some_examples(images, labels):
     plt.figure(figsize=(10, 10))

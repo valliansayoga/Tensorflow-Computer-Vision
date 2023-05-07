@@ -1,7 +1,11 @@
 import numpy as np
 import tensorflow as tf
 
-from deeplearning_models import MyCustomModels, functional_model, sequential_model
+from deeplearning_models import (
+    MyCustomModels,
+    functional_model,
+    sequential_model,
+)
 
 if __name__ == "__main__":
     (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
